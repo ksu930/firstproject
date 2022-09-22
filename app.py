@@ -133,16 +133,23 @@ def posting():
         comment_receive = request.form["comment_give"]
         date_receive = request.form["date_give"]
         commend_list = list(db.posts.find({}, {'_id': False}))
-        count = len(commend_list) + 1
-
-        print(type(date_receive))
+        # count = len(commend_list) + 1
+        # print(commend_list)
+        # print(type(date_receive))
+        # num_list = sorted(commend_list, key=lambda k:k['num'])
+        print(commend_list)
+        num_lists = list(commend['num'] for commend in commend_list)
+        int_list = map(int, num_lists)
+        num_list = sorted(int_list)
+        num_last = num_list[-1]
+        num = num_last+1
         doc = {
             "username": user_info["username"],
             "profile_name": user_info["profile_name"],
             "profile_pic_real": user_info["profile_pic_real"],
             "comment": comment_receive,
             "date": date_receive,
-            "num" : count
+            "num" : num
         }
         db.posts.insert_one(doc)
         return jsonify({"result": "success", 'msg': '포스팅 성공'})
@@ -173,6 +180,7 @@ def get_posts():
 
             post["count_like"] = db.likes.count_documents({"post_id": post["_id"], "type": "like"})
             post["like_by_me"] = bool(db.likes.find_one({"post_id": post["_id"], "type": "like", "username": my_username}))
+
 
         return jsonify({"result": "success", "msg": "포스팅을 가져왔습니다.", "posts": posts})
     except (jwt.ExpiredSignatureError, jwt.exceptions.DecodeError):
